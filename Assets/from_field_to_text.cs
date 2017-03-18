@@ -1,5 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using ConvNetSharp.Layers;
@@ -9,21 +11,59 @@ using ConvNetSharp.Training;
 public class from_field_to_text : MonoBehaviour
 {
 
-    public int shtsht;
+    //public int shtsht;
 
     public class tdtrainer_options {
-        public double learning_rate;
-        public double momentum;
-        public int batch_size;
-        public double l2_decay;
+        public double learning_rate = 0;
+        public double momentum = 0;
+        public int batch_size = 0;
+        public double l2_decay = 0;
+
+        public void Save(string name)
+        {
+            PlayerPrefs.SetString(name + ".WasSaved", "t");
+
+            PlayerPrefs.SetInt(name + ".batch_size", this.batch_size);
+
+            PlayerPrefs.SetString(name + ".learning_rate", this.learning_rate.ToString());
+
+            PlayerPrefs.SetString(name + ".momentum", this.momentum.ToString());
+
+            PlayerPrefs.SetString(name + ".l2_decay", this.l2_decay.ToString());
+
+        }
+
+        public bool Load(string name)
+        {
+            if(PlayerPrefs.HasKey(name + ".WasSaved"))
+            {
+                if(PlayerPrefs.GetString(name + ".WasSaved") == "t")
+                {
+                    batch_size = PlayerPrefs.GetInt(name + ".batch_size");
+
+                    learning_rate = Convert.ToDouble(PlayerPrefs.GetString(name + ".learning_rate"));
+
+                    momentum = Convert.ToDouble(PlayerPrefs.GetString(name + ".momentum"));
+
+                    l2_decay = Convert.ToDouble(PlayerPrefs.GetString(name + ".l2_decay"));
+                }
+            }
+
+            return false;
+        }
+
+        public void DeleteSave(string name)
+        {
+            PlayerPrefs.SetString(name + ".WasSaved", "f");
+        }
     }
 
     public class Layer
     {
-        public string type;
-        public int out_sx, out_sy, out_depth;
-        public string activation;
-        public int num_neurons;
+        public string type = "";
+        public int out_sx = 0, out_sy = 0, out_depth = 0;
+        public string activation = "";
+        public int num_neurons = 0;
         public Layer(string type, int out_sx, int out_sy, int out_depth)
         {
             this.type = type;
@@ -64,7 +104,29 @@ public class from_field_to_text : MonoBehaviour
 
 
 
+        /*
+            public void Save(string name)
+            {
+                PlayerPrefs.SetString(name + ".WasSaved", "t");
+            }
 
+            public bool Load(string name)
+            {
+                if(PlayerPrefs.HasKey(name + ".WasSaved"))
+                {
+                    if(PlayerPrefs.GetString(name + ".WasSaved") == "t")
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            public void DeleteSaves(string name)
+            {
+                PlayerPrefs.SetString(name + ".WasSaved", "f");
+            }
+            */
 
 
         // An agent is in state0 and does action0
@@ -75,9 +137,9 @@ public class from_field_to_text : MonoBehaviour
 
         public class Experience
         {
-            public double[] state0, state1;
-            public int action0;
-            public double reward0;
+            public double[] state0 = new double[0], state1 = new double[0];
+            public int action0 = 0;
+            public double reward0 = 0;
             public Experience(double[] state0, int action0, double reward0, double[] state1)
             {
                 this.state0 = state0;
@@ -88,6 +150,146 @@ public class from_field_to_text : MonoBehaviour
             public Experience()
             {
 
+            }
+
+            public void Save(string name)
+            {
+                PlayerPrefs.SetString(name + ".WasSaved", "t");
+                PlayerPrefs.SetInt(name + ".action0", this.action0);
+                PlayerPrefs.SetInt(name + ".state0.Length", this.state0.Length);
+                for(int i = 0; i < this.state0.Length; i++)
+                {
+                    PlayerPrefs.SetString(name + ".state0[" + i.ToString() + "]", state0[i].ToString());
+                }
+                PlayerPrefs.SetInt(name + ".state1.Length", this.state1.Length);
+                for (int i = 0; i < this.state1.Length; i++)
+                {
+                    PlayerPrefs.SetString(name + ".state1[" + i.ToString() + "]", state1[i].ToString());
+                }
+                PlayerPrefs.SetString(name + ".reward0", this.reward0.ToString());
+            }
+
+            public bool Load(string name)
+            {
+                if(PlayerPrefs.HasKey(name + ".WasSaved"))
+                {
+                    if(PlayerPrefs.GetString(name + ".WasSaved") == "t")
+                    {
+                        this.action0 = PlayerPrefs.GetInt(name + ".action0");
+                        this.state0 = new double[PlayerPrefs.GetInt(name + ".state0.Length")];
+                        for (int i = 0; i < state0.Length; i++)
+                        {
+                            try
+                            {
+                                this.state0[i] = Convert.ToDouble(PlayerPrefs.GetString(name + "state0[" + i.ToString() + "]"));
+                            }
+                            catch
+                            {
+                                this.state0[i] = 0;
+                            }
+                        }
+                        this.state1 = new double[PlayerPrefs.GetInt(name + ".state1.Length")];
+                        for (int i = 0; i < state1.Length; i++)
+                        {
+                            try
+                            {
+
+                                this.state1[i] = Convert.ToDouble(PlayerPrefs.GetString(name + "state1[" + i.ToString() + "]"));
+                            }
+                            catch
+                            {
+                                this.state1[i] = 0;
+                            }
+                        }
+
+                        this.reward0 = Convert.ToDouble(PlayerPrefs.GetString(name + ".reward0"));
+
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            public void DeleteSaves(string name)
+            {
+                PlayerPrefs.SetString(name + ".WasSaved", "f");
+            }
+        }
+
+        public class window
+        {
+            public List<double> avav;
+            public double average;
+            int n = 0;
+
+            public window()
+            {
+                avav = new List<double>();
+                average = 0;
+                n = 0;
+            }
+
+            public void add(double value)
+            {
+                avav.Add(value);
+                if(n == 0)
+                {
+                    n = 1;
+                    average = value;
+                    avav.Add(value);
+                } else
+                {
+                    n++;
+                    avav.Add(value);
+                   
+                }
+            }
+
+            public double get_average()
+            {
+                average = 0;
+
+                for (int i = 0; i < n; i++)
+                {
+                    average += avav[i] / n;
+                }
+                return average;
+            }
+
+
+            public void Save(string name)
+            {
+                PlayerPrefs.SetString(name + ".WasSaved", "t");
+                PlayerPrefs.SetInt(name + ".n", this.n);
+                PlayerPrefs.SetInt(name + ".avav.Count", this.avav.Count);
+                for(int i = 0; i < this.avav.Count; i++)
+                {
+                    PlayerPrefs.SetString(name + ".avav[" + i.ToString() + "]", avav[i].ToString());
+                }
+            }
+
+            public bool Load(string name)
+            {
+                if (PlayerPrefs.HasKey(name + ".WasSaved"))
+                {
+                    if (PlayerPrefs.GetString(name + ".WasSaved") == "t")
+                    {
+                        this.n = PlayerPrefs.GetInt(name + ".n");
+                        avav.Clear();
+                        for(int i = 0; i < n; i++)
+                        {
+                            avav.Add(Convert.ToDouble(PlayerPrefs.GetString(name + ".avav[" + i.ToString() + "]")));
+                        }
+
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            public void DeleteSaves(string name)
+            {
+                PlayerPrefs.SetString(name + ".WasSaved", "f");
             }
         }
 
@@ -124,7 +326,7 @@ public class from_field_to_text : MonoBehaviour
                 return res;
             }
 
-            public double[] state0, state1;
+            public double[] state0 = new double[0], state1 = new double[0];
             public int action0;
             public double reward0;
             public Layer[] layer_defs;
@@ -149,8 +351,49 @@ public class from_field_to_text : MonoBehaviour
             public int age, forward_passes;
             public double epsilon = 1.0;
             public double latest_reward;
+            public window average_reward_window = new window();
+            public window average_loss_window = new window();
             public double[] last_input_array;
             public bool learning;
+
+
+
+            public int test;
+            
+
+
+            public void Save(string name)
+            {
+                PlayerPrefs.SetString(name + ".WasSaved", "t");
+                this.value_net.Save(name + ".value_net");
+                PlayerPrefs.SetInt(name + ".test", test);
+                Debug.Log("Successful save");
+                test++;
+
+            }
+
+            public bool Load(string name)
+            {
+                if (PlayerPrefs.HasKey(name + ".WasSaved"))
+                {
+                    if (PlayerPrefs.GetString(name + ".WasSaved") == "t")
+                    {
+                        if (!this.value_net.Load(name + ".value_net"))
+                        {
+                            return false;
+                        }
+                        test = PlayerPrefs.GetInt(name + ".test");
+                        Debug.Log("Successful load");
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            public void DeleteSaves(string name)
+            {
+                PlayerPrefs.SetString(name + ".WasSaved", "f");
+            }
 
 
 
@@ -205,7 +448,7 @@ public class from_field_to_text : MonoBehaviour
 
             public int random_action()
             {
-                return Random.Range(0, this.num_actions);
+                return UnityEngine.Random.Range(0, this.num_actions);
             }
 
             public class polic
@@ -321,13 +564,18 @@ public class from_field_to_text : MonoBehaviour
                     net_input = this.getNetInput(input_array);
                     if(this.learning)
                     {
-                        this.epsilon = Mathf.Min((float)1.0, Mathf.Max((float)this.epsilon_min, (float)(1.0 - (this.age - this.learning_steps_burnin) / 
-                            (this.learning_steps_total - this.learning_steps_burnin))));
+                        this.epsilon = Mathf.Min((float)1.0, Mathf.Max((float)this.epsilon_min, (float)(1.0 - (float)(this.age - this.learning_steps_burnin) / 
+                            (float)(this.learning_steps_total - this.learning_steps_burnin))));
                     } else
                     {
                         this.epsilon = this.epsilon_test_time;
                     }
-                    var rf = Random.Range((float) 0.0, (float) 0.1);
+
+                  /*  Debug.Log(epsilon);
+                    Debug.Log((float)this.epsilon_min);
+                    Debug.Log((float)(1.0 - (float)(this.age - this.learning_steps_burnin) /
+                            (float)(this.learning_steps_total - this.learning_steps_burnin)));*/
+                    var rf = UnityEngine.Random.Range((float) 0.0, (float) 1);
                     if(rf < this.epsilon)
                     {
                         action = this.random_action();
@@ -366,6 +614,7 @@ public class from_field_to_text : MonoBehaviour
             public void backward(double reward)
             {
                 this.latest_reward = reward;
+                this.average_reward_window.add(reward);
                 this.reward_window = shift_push(this.reward_window, reward);
                 if(!this.learning)
                 {
@@ -389,7 +638,7 @@ public class from_field_to_text : MonoBehaviour
                         this.experience = push(this.experience, e);
                     } else
                     {
-                        var ri = Random.Range(0, this.experience_size - 1);
+                        var ri = UnityEngine.Random.Range(0, this.experience_size);
                         this.experience[ri] = e;
                     }
                 }
@@ -402,20 +651,47 @@ public class from_field_to_text : MonoBehaviour
                     var avcost = 0.0;
                     for(var k = 0; k < this.tdtrainer.BatchSize; k++)
                     {
-                        var re = Random.Range(0, this.experience.Length - 1);
+                        var re = UnityEngine.Random.Range(0, this.experience.Length);
                         var e = this.experience[re];
                         var x = new Volume(1, 1, this.net_inputs);
                         x.Weights = e.state0;
                         var maxact = this.policy(e.state1);
                         var r = e.reward0 + this.gamma * maxact.value;
-                        this.tdtrainer.Train(x, e.action0);
-                        var loss = this.tdtrainer.Loss;
+                        var ystruct = new ystr();
+                        ystruct.dim = e.action0;
+                        ystruct.val = r;
+                        double loss = this.tdtrainer.Train(x, ystruct);
                         avcost += loss;
                     }
                     avcost = avcost / this.tdtrainer.BatchSize;
+                    this.average_loss_window.add(avcost);
                 }
+                visSelf("out.txt");
             }
+
+            
+
+            public void visSelf(string fileName)
+            {
+                if(!File.Exists(fileName))
+                {
+                    File.Create(fileName);
+                }
+
+                if(this.age == 1)
+                {
+                    File.WriteAllLines(fileName, new[] { ""});
+                }
+
+                File.AppendAllText(fileName, this.age.ToString() + " " + this.average_loss_window.get_average().ToString() + 
+                    " " + this.average_reward_window.get_average().ToString() + " " + this.latest_reward.ToString() + "\n");
+            }
+
+            
         }
+
+
+
 
 
     }
@@ -436,9 +712,9 @@ public class from_field_to_text : MonoBehaviour
     public Net my_net;
     public from_field_to_text.opt opt1 = new opt();
     public Layer[] layer_defs = new Layer[0];
-    public int num_inputs = 2;
-    public int num_actions = 3;
-    public int temporal_window = 1;
+    public int num_inputs = 10;
+    public int num_actions = 4;
+    public int temporal_window = 3;
     public int network_size;
     public deepqlearn.Brain brain;
 
@@ -446,27 +722,73 @@ public class from_field_to_text : MonoBehaviour
     public GameObject input1, input2, reward1, text1;
     public double test;
 
-    public void reward()
+    public void reward(double reward)
     {
-        double rew = double.Parse(reward1.GetComponent<Text>().text);
-        test = brain.epsilon;
-        brain.backward(rew);
+        brain.backward(reward);
     }
 
-    public void input()
+    public int input(double[] inputs)
     {
-        double hlp1;
-        hlp1 = double.Parse(input1.GetComponent<Text>().text);
-        double hlp2 = double.Parse(input2.GetComponent<Text>().text);
-        double[] pls = new double[2];
-        pls[0] = hlp1;
-        pls[1] = hlp2;
-        int sht = brain.forward(pls);
-        text1.GetComponent<Text>().text = sht.ToString();
+        return brain.forward(inputs);
     }
+
+
+    public void save()
+    {
+        brain.Save(AiName);
+        test = brain.test;
+    }
+
+    public void load()
+    {
+        brain.Load(AiName);
+        test = brain.test;
+    }
+
+    public void reset()
+    {
+        brain.DeleteSaves(AiName);
+        PlayerPrefs.DeleteAll();
+        init();
+    }
+
+    
+    /*
+    public void save()
+    {
+        PlayerPrefs.g
+    }*/
+
+    public string AiName;
 
 	// Use this for initialization
 	void Start () {
+        init();
+
+
+    }
+
+    public void stop_learn()
+    {
+        brain.learning = false;
+    }
+    public void start_learn()
+    {
+        brain.learning = true;
+    }
+
+    void init()
+    {
+
+
+
+        opt1 = new opt();
+        layer_defs = new Layer[0];
+        num_inputs = 11;
+        num_actions = 5;
+        temporal_window = 3;
+        
+        
         network_size = num_inputs * temporal_window + num_actions * temporal_window + num_inputs;
         layer_defs = push(layer_defs, new Layer("input", 1, 1, network_size));
         layer_defs = push(layer_defs, new Layer("fc", 50, "relu"));
@@ -479,10 +801,10 @@ public class from_field_to_text : MonoBehaviour
         opt1.gamma = 0.7;
         opt1.learning_steps_total = 200000;
         opt1.learning_steps_burnin = 3000;
-        opt1.epsilon_min = 0.05;
-        opt1.epsilon_test_time = 0.05;
+        opt1.epsilon_min = 0.2;
+        opt1.epsilon_test_time = 0.0;
         tdtrainer_options nev = new tdtrainer_options();
-        nev.learning_rate = 0.001;
+        nev.learning_rate = 0.02;
         nev.momentum = 0.0;
         nev.batch_size = 64;
         nev.l2_decay = 0.01;
@@ -491,12 +813,10 @@ public class from_field_to_text : MonoBehaviour
 
 
 
-
-
     }
-	
-	// Update is called once per frame
-	void Update () {
+
+    // Update is called once per frame
+    void Update () {
 		
 	}
 }

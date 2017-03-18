@@ -83,20 +83,21 @@ namespace ConvNetSharp.Training
             }
         }
 
-        protected override void Backward(double y)
+        protected override double Backward(double y)
         {
-            base.Backward(y);
 
             this.L2DecayLoss = 0.0;
             this.L1DecayLoss = 0.0;
+            return base.Backward(y);
         }
 
-        protected override void Backward(double[] y)
+        protected override double Backward(double[] y)
         {
-            base.Backward(y);
 
             this.L2DecayLoss = 0.0;
             this.L1DecayLoss = 0.0;
+
+            return base.Backward(y);
         }
     }
 }

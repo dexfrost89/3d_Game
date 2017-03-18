@@ -98,20 +98,33 @@ namespace ConvNetSharp.Training
             // and it should all be computed correctly and automatically. 
         }
 
-        protected override void Backward(double y)
+        protected override double Backward(double y)
         {
-            base.Backward(y);
+            var cost_loss = base.Backward(y);
 
             this.L2DecayLoss = 0.0;
             this.L1DecayLoss = 0.0;
+            return cost_loss;
         }
 
-        protected override void Backward(double[] y)
+        protected override double Backward(double[] y)
         {
-            base.Backward(y);
+            var cost_loss = base.Backward(y);
 
             this.L2DecayLoss = 0.0;
             this.L1DecayLoss = 0.0;
+
+            return cost_loss;
+        }
+
+        protected override double Backward(ystr y)
+        {
+            double cost_loss = base.Backward(y);
+
+            this.L2DecayLoss = 0.0;
+            this.L1DecayLoss = 0.0;
+
+            return cost_loss;
         }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using UnityEngine;
 
 namespace ConvNetSharp
 {
@@ -181,5 +182,64 @@ namespace ConvNetSharp
                 this.Weights[i] += c;
             }
         }
+
+        public void Save(string name)
+        {
+            PlayerPrefs.SetInt(name + ".Depth", this.Depth);
+
+            PlayerPrefs.SetInt(name + ".Height", this.Height);
+
+            PlayerPrefs.SetInt(name + ".Width", this.Width);
+
+            PlayerPrefs.SetInt(name + ".WeightGradients.Length", this.WeightGradients.Length);
+
+            for(int i = 0; i < WeightGradients.Length; i++)
+            {
+                PlayerPrefs.SetString(name + ".WeightGradients[" + i.ToString() + "]", this.WeightGradients[i].ToString());
+            }
+
+            PlayerPrefs.SetInt(name + ".Weights.Length", this.Weights.Length);
+
+            for(int i = 0; i < Weights.Length; i++)
+            {
+                PlayerPrefs.SetString(name + ".Weights[" + i.ToString() + "]", this.Weights[i].ToString());
+            }
+
+            PlayerPrefs.SetString(name + ".WasSaved", "t");
+
+        }
+
+        public bool Load(string name)
+        {
+            if(!PlayerPrefs.HasKey(name + ".WasSaved"))
+            {
+                return false;
+            }
+            if(PlayerPrefs.GetString(name + ".WasSaved") == "t")
+            {
+                this.Depth = PlayerPrefs.GetInt(name + ".Depth");
+
+                this.Height = PlayerPrefs.GetInt(name + ".Height");
+
+                this.Width = PlayerPrefs.GetInt(name + ".Width");
+
+                this.WeightGradients = new double[PlayerPrefs.GetInt(name + ".WeightGradients.Length")];
+
+                for (int i = 0; i < WeightGradients.Length; i++)
+                {
+                    WeightGradients[i] = Convert.ToDouble(PlayerPrefs.GetString(name + ".WeightGradients[" + i.ToString() + "]"));
+                }
+
+                this.Weights = new double[PlayerPrefs.GetInt(name + ".Weights.Length")];
+
+                for (int i = 0; i < Weights.Length; i++)
+                {
+                    Weights[i] = Convert.ToDouble(PlayerPrefs.GetString(name + ".Weights[" + i.ToString() + "]"));
+                }
+                return true;
+            }
+            return false;
+        }
+
     }
 }

@@ -46,6 +46,11 @@ namespace ConvNetSharp.Layers
             throw new NotImplementedException();
         }
 
+        public double Backward(ystr y)
+        {
+            throw new NotImplementedException();
+        }
+
         public override Volume Forward(Volume input, bool isTraining = false)
         {
             this.InputActivation = input;

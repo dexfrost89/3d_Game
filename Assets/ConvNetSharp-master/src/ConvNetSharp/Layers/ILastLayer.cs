@@ -5,5 +5,7 @@ namespace ConvNetSharp.Layers
         double Backward(double y);
 
         double Backward(double[] y);
+
+        double Backward(ystr y);
     }
 }

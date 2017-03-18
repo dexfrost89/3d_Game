@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 using System.Runtime.Serialization;
 
 namespace ConvNetSharp.Layers
@@ -51,6 +52,20 @@ namespace ConvNetSharp.Layers
             return loss;
         }
 
+        public double Backward(ystr y)
+        {
+            var x = this.InputActivation;
+            x.WeightGradients = new double[x.Weights.Length];
+            var loss = 0.0;
+            var i = y.dim;
+            var yi = y.val;
+            var dy = x.Weights[i] - yi;
+            x.WeightGradients[i] = dy;
+            loss += 0.5 * dy * dy;
+
+            return loss;
+        }
+ 
         public override Volume Forward(Volume input, bool isTraining = false)
         {
             this.InputActivation = input;
@@ -71,6 +86,39 @@ namespace ConvNetSharp.Layers
             this.OutputDepth = inputCount;
             this.OutputWidth = 1;
             this.OutputHeight = 1;
+        }
+
+        public override void Save(string name)
+        {
+            PlayerPrefs.SetString(name + ".WasSaved", "t");
+
+            PlayerPrefs.SetInt(name + ".NeuronCount", this.NeuronCount);
+
+            PlayerPrefs.SetInt(name + ".OutputDepth", this.OutputDepth);
+
+            PlayerPrefs.SetInt(name + ".OutputHeight", this.OutputHeight);
+
+            PlayerPrefs.SetInt(name + ".OutputWidth", this.OutputWidth);
+        }
+
+        public override bool Load(string name)
+        {
+            if(PlayerPrefs.HasKey(name + ".WasSaved"))
+            {
+                if(PlayerPrefs.GetString(name + ".WasSaved") == "t")
+                {
+                    this.NeuronCount = PlayerPrefs.GetInt(name + ".NeuronCount");
+
+                    this.OutputDepth = PlayerPrefs.GetInt(name + ".OutputDepth");
+
+                    this.OutputHeight = PlayerPrefs.GetInt(name + ".OutputHeight");
+
+                    this.OutputWidth = PlayerPrefs.GetInt(name + ".OutputWidth");
+
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

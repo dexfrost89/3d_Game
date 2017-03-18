@@ -28,38 +28,63 @@ namespace ConvNetSharp.Training
             get { return this.CostLoss; }
         }
 
-        public void Train(Volume x, double y)
+        public double Train(Volume x, double y)
         {
             this.Forward(x);
 
-            this.Backward(y);
+            var CostLoss = this.Backward(y);
 
             this.TrainImplem();
+
+            return CostLoss;
         }
 
-        public void Train(Volume x, double[] y)
+        public double Train(Volume x, double[] y)
         {
             this.Forward(x);
 
-            this.Backward(y);
+            var CostLoss = this.Backward(y);
 
             this.TrainImplem();
+
+            return CostLoss;
+        }
+
+        public double Train(Volume x, ConvNetSharp.Layers.ystr y)
+        {
+            this.Forward(x);
+
+            var CostLoss = this.Backward(y);
+
+            this.TrainImplem();
+
+            return CostLoss;
         }
 
         protected abstract void TrainImplem();
 
-        protected virtual void Backward(double y)
+        protected virtual double Backward(double y)
         {
             var chrono = Stopwatch.StartNew();
             this.CostLoss = this.Net.Backward(y);
             this.BackwardTime = chrono.Elapsed;
+            return CostLoss;
         }
 
-        protected virtual void Backward(double[] y)
+        protected virtual double Backward(double[] y)
         {
             var chrono = Stopwatch.StartNew();
             this.CostLoss = this.Net.Backward(y);
             this.BackwardTime = chrono.Elapsed;
+            return CostLoss;
+        }
+
+        protected virtual double Backward(ConvNetSharp.Layers.ystr y)
+        {
+            var chrono = Stopwatch.StartNew();
+            this.CostLoss = this.Net.Backward(y);
+            this.BackwardTime = chrono.Elapsed;
+            return CostLoss;
         }
 
         private void Forward(Volume x)

@@ -1,4 +1,5 @@
 using System.Runtime.Serialization;
+using UnityEngine;
 
 namespace ConvNetSharp.Layers
 {
@@ -23,6 +24,37 @@ namespace ConvNetSharp.Layers
 
         public override void Backward()
         {
+        }
+
+        public override void Save(string name)
+        {
+            PlayerPrefs.SetString(name + ".WasSaved", "t");
+
+            PlayerPrefs.SetInt(name + ".OutputWidth", this.OutputWidth);
+
+            PlayerPrefs.SetInt(name + ".OutputHeight", this.OutputHeight);
+
+            PlayerPrefs.SetInt(name + ".OutputDepth", this.OutputDepth);
+        }
+
+        public override bool Load(string name)
+        {
+            if(PlayerPrefs.HasKey(name + ".WasSaved"))
+            {
+                if(PlayerPrefs.GetString(name + ".WasSaved") == "t")
+                {
+
+                    this.OutputDepth = PlayerPrefs.GetInt(name + ".OutputDepth");
+
+                    this.OutputHeight = PlayerPrefs.GetInt(name + ".OutputHeight");
+
+                    this.OutputWidth = PlayerPrefs.GetInt(name + ".OutputWidth");
+
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

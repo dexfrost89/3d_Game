@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
+using System;
 using System.Runtime.Serialization;
 
 namespace ConvNetSharp.Layers
@@ -163,6 +165,103 @@ namespace ConvNetSharp.Layers
             });
 
             return response;
+        }
+        
+
+        public override void Save(string name)
+        {
+            PlayerPrefs.SetInt(name + ".inputCount", this.inputCount);
+
+            if(this.Activation == Activation.Relu)
+            {
+                PlayerPrefs.SetString(name + ".Activation", "Relu");
+            }
+
+            this.Biases.Save(name + ".Biases");
+
+            PlayerPrefs.SetInt(name + ".Filters.Count", this.Filters.Count);
+
+            for(int i = 0; i < this.Filters.Count; i++)
+            {
+                this.Filters[i].Save(name + ".Filters[" + i.ToString() + "]");
+            }
+
+            PlayerPrefs.SetString(name + ".L1DecayMul", this.L1DecayMul.ToString());
+
+            PlayerPrefs.SetString(name + ".L2DecayMul", this.L2DecayMul.ToString());
+
+            PlayerPrefs.SetInt(name + ".NeuronCount", this.NeuronCount);
+
+            PlayerPrefs.SetInt(name + ".GroupSize", this.GroupSize);
+
+            PlayerPrefs.SetString(name + ".BiasPref", this.BiasPref.ToString());
+
+            PlayerPrefs.SetString(name + ".WasSaved", "t");
+
+            PlayerPrefs.SetInt(name + ".InputDepth", this.InputDepth);
+
+            PlayerPrefs.SetInt(name + ".InputHeight", this.InputHeight);
+
+            PlayerPrefs.SetInt(name + ".InputWidth", this.InputWidth);
+            
+            PlayerPrefs.SetInt(name + ".OutputDepth", this.OutputDepth);
+
+            PlayerPrefs.SetInt(name + ".OutputHeight", this.OutputHeight);
+
+            PlayerPrefs.SetInt(name + ".OutputWidth", this.OutputWidth);
+        }
+
+        public override bool Load(string name)
+        {
+            if (!PlayerPrefs.HasKey(name + ".WasSaved"))
+                return false;
+            if(PlayerPrefs.GetString(name + ".WasSaved") == "t")
+            {
+                this.inputCount = PlayerPrefs.GetInt(name + ".inputCount");
+
+                if(PlayerPrefs.GetString(name + ".Activation") == "Relu")
+                {
+                    this.Activation = Activation.Relu;
+                }
+
+                if(this.Biases.Load(name + ".Biases") == false)
+                {
+                    return false;
+                }
+
+                int len = PlayerPrefs.GetInt(name + ".Filters.Count");
+                this.Filters = new List<Volume>();
+
+                for(int i = 0; i < len; i++)
+                {
+                    this.Filters.Add(new Volume(0, 0, 0));
+                    if(this.Filters[i].Load(name + ".Filters[" + i.ToString() + "]") == false)
+                    {
+                        return false;
+                    }
+                }
+
+                this.L1DecayMul = Convert.ToDouble(PlayerPrefs.GetString(name + ".L1DecayMul"));
+
+                this.L2DecayMul = Convert.ToDouble(PlayerPrefs.GetString(name + ".L2DecayMul"));
+
+                this.BiasPref = Convert.ToDouble(PlayerPrefs.GetString(name + ".BiasPref"));
+
+                this.NeuronCount = PlayerPrefs.GetInt(name + ".NeuronCount");
+
+                this.GroupSize = PlayerPrefs.GetInt(name + ".GroupSize");
+
+                this.OutputDepth = PlayerPrefs.GetInt(name + ".OutputDepth");
+
+                this.OutputHeight = PlayerPrefs.GetInt(name + ".OutputHeight");
+
+                this.OutputWidth = PlayerPrefs.GetInt(name + ".OutputWidth");
+
+                return true;
+            }
+
+
+            return false;
         }
     }
 }

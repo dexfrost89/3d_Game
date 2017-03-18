@@ -1,8 +1,15 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 using System.Runtime.Serialization;
 
 namespace ConvNetSharp.Layers
 {
+    public class ystr {
+        public int dim;
+        public double val;
+    }
+
+
     public class ParametersAndGradients
     {
         public double[] Parameters { get; set; }
@@ -68,6 +75,29 @@ namespace ConvNetSharp.Layers
         public virtual List<ParametersAndGradients> GetParametersAndGradients()
         {
             return new List<ParametersAndGradients>();
+        }
+
+        public virtual void Save(string name)
+        {
+            PlayerPrefs.SetString(name + ".WasSaved", "t");
+        }
+
+        public virtual bool Load(string name)
+        {
+            if(PlayerPrefs.HasKey(name + ".WasSaved"))
+            {
+                if(PlayerPrefs.GetString(name + ".WasSaved") == "t")
+                {
+                    return true;
+                }
+
+            }
+            return false;
+        }
+
+        public void DeleteSave(string name)
+        {
+            PlayerPrefs.SetString(name + ".WasSaved", "f");
         }
     }
 }

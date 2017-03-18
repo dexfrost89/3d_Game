@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 using System.Collections.Generic;
 using ConvNetSharp.Layers;
 
@@ -183,6 +184,24 @@ namespace ConvNetSharp
             throw new Exception("Last layer doesnt implement ILastLayer interface");
         }
 
+        public double Backward(ystr y)
+        {
+            var n = this.layers.Count;
+            var lastLayer = this.layers[n - 1] as ILastLayer;
+            if (lastLayer != null)
+            {
+                var loss = lastLayer.Backward(y); // last layer assumed to be loss layer
+                for (var i = n - 2; i >= 0; i--)
+                {
+                    // first layer assumed input
+                    this.layers[i].Backward();
+                }
+                return loss;
+            }
+
+            throw new Exception("Last layer doesnt implement ILastLayer interface");
+        }
+
         public int GetPrediction()
         {
             // this is a convenience function for returning the argmax
@@ -220,6 +239,46 @@ namespace ConvNetSharp
             }
 
             return response;
+        }
+
+        public void Save(string name)
+        {
+            PlayerPrefs.SetString(name + ".WasSaved", "t");
+
+            PlayerPrefs.SetInt(name + ".layers.Count", this.layers.Count);
+
+            for (int i = 0; i < layers.Count; i++)
+            {
+                this.layers[i].Save(name + ".layers[" + i.ToString() + "]");
+            }
+        }
+
+        public bool Load(string name)
+        {
+            if(PlayerPrefs.HasKey(name + ".WasSaved"))
+            {
+                if(PlayerPrefs.GetString(name + ".WasSaved") == "t")
+                {
+                    var len = PlayerPrefs.GetInt(name + ".layers.Count");
+
+                    for(int i = 0; i < len; i++)
+                    {
+                        if(!layers[i].Load(name + ".layers[" + i.ToString() + "]"))
+                        {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public void DeleteSave(string name)
+        {
+            PlayerPrefs.SetString(name + ".WasSaved", "f");
         }
     }
 }
