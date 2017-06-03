@@ -16,8 +16,8 @@ public class GetStr : MonoBehaviour {
 	// Update is called once per frame
 	void Update ()
     {
-        StrVal.GetComponent<Text>().text = Player.GetComponent<Prefs>().Str.ToString();
-        AgVal.GetComponent<Text>().text = Player.GetComponent<Prefs>().Ag.ToString();
-        EndVal.GetComponent<Text>().text = Player.GetComponent<Prefs>().End.ToString();
+        StrVal.GetComponent<Text>().text = "Str:" + Player.GetComponent<Prefs>().Str.ToString();
+        AgVal.GetComponent<Text>().text = "Ag:" + Player.GetComponent<Prefs>().Ag.ToString();
+        EndVal.GetComponent<Text>().text = "End:" + Player.GetComponent<Prefs>().End.ToString();
     }
 }

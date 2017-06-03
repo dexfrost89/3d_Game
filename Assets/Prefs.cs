@@ -5,25 +5,38 @@ using UnityEngine;
 public class Prefs : MonoBehaviour {
     public int Str, Ag, End, En, Hp;
 
+    public GameObject mon, need;
 
     public void PlusStr()
     {
-        Str = Mathf.Min(Str + 1, 99);
-        Save();
+        if(need.GetComponent<forneed>().need <= mon.GetComponent<for_money>().money && Str < 99)
+        {
+            mon.GetComponent<for_money>().money -= need.GetComponent<forneed>().need;
+            Str = Mathf.Min(Str + 1, 99);
+            Save();
+        }
     }
 
 
     public void PlusAg()
     {
-        Ag = Mathf.Min(Ag + 1, 99);
-        Save();
+        if (need.GetComponent<forneed>().need <= mon.GetComponent<for_money>().money && Ag < 99)
+        {
+            mon.GetComponent<for_money>().money -= need.GetComponent<forneed>().need;
+            Ag = Mathf.Min(Ag + 1, 99);
+            Save();
+        }
     }
 
 
     public void PlusEnd()
     {
-        End = Mathf.Min(End + 1, 99);
-        Save();
+        if (need.GetComponent<forneed>().need <= mon.GetComponent<for_money>().money && End < 99)
+        {
+            mon.GetComponent<for_money>().money -= need.GetComponent<forneed>().need;
+            End = Mathf.Min(End + 1, 99);
+            Save();
+        }
     }
 
     public void MinusStr()
@@ -153,8 +166,22 @@ public class Prefs : MonoBehaviour {
             gameObject.GetComponent<from_field_to_text>().brain.backward((float)(dHp + dEn) / (float)(3 * (Str + nStr)));
     }
 
+    public GameObject lvl;
+
     public void startfight()
     {
+        int help99;
+        if (gameObject.name == "EnemyFighter")
+        {
+            help99 = Random.Range(Mathf.Max(lvl.GetComponent<forlvl>().lvl - 3, 1), Mathf.Min(lvl.GetComponent<forlvl>().lvl + 3, 295) + 1);
+            Str = Random.Range(Mathf.Max(1, help99 - 196), Mathf.Min(100, help99 + 1));
+            End = Random.Range(Mathf.Max(1, help99 - Str - 97), Mathf.Min(100, help99 + 2 - Str));
+            Ag = help99 - Str - End + 2;
+        } else
+        {
+            help99 
+        }
+
         Hp = Str * 10;
         En = End * 10;
     }

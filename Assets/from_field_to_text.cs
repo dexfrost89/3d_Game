@@ -749,7 +749,7 @@ public class from_field_to_text : MonoBehaviour
     {
         brain.DeleteSaves(AiName);
         PlayerPrefs.DeleteAll();
-        init();
+        init(11, 5, 3);
     }
 
     
@@ -763,7 +763,7 @@ public class from_field_to_text : MonoBehaviour
 
 	// Use this for initialization
 	void Start () {
-        init();
+        init(11, 5, 3);
 
 
     }
@@ -777,16 +777,16 @@ public class from_field_to_text : MonoBehaviour
         brain.learning = true;
     }
 
-    void init()
+    public void init(int inps, int acs, int temp)
     {
 
 
 
         opt1 = new opt();
         layer_defs = new Layer[0];
-        num_inputs = 11;
-        num_actions = 5;
-        temporal_window = 3;
+        num_inputs = inps;
+        num_actions = acs;
+        temporal_window = temp;
         
         
         network_size = num_inputs * temporal_window + num_actions * temporal_window + num_inputs;
@@ -796,10 +796,10 @@ public class from_field_to_text : MonoBehaviour
         layer_defs = push(layer_defs, new Layer("regression", num_actions));
         opt1.layer_defs = layer_defs;
         opt1.temporal_window = temporal_window;
-        opt1.experience_size = 30000;
+        opt1.experience_size = 3000;
         opt1.start_learn_threshold = 1000;
         opt1.gamma = 0.7;
-        opt1.learning_steps_total = 200000;
+        opt1.learning_steps_total = 20000;
         opt1.learning_steps_burnin = 3000;
         opt1.epsilon_min = 0.2;
         opt1.epsilon_test_time = 0.0;
